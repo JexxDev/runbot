@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bot Creator</title>
+  <style>
+    body { margin: 0; font-family: Arial; display: flex; height: 100vh; }
+    #sidebar {
+      width: 20%; background: #222; color: white;
+      display: flex; flex-direction: column; padding: 10px;
+    }
+    #sidebar button { margin-bottom: 10px; padding: 10px; cursor: pointer; }
+    #botList { flex: 1; overflow-y: auto; }
+    .bot-item { padding: 8px; background: #444; margin: 4px 0; cursor: pointer; }
+    #main {
+      width: 80%; padding: 20px;
+    }
+    input, textarea, select {
+      display: block; margin-bottom: 10px; width: 100%; padding: 8px;
+    }
+    textarea { height: 150px; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <button onclick="createBot()">Create a bot</button>
+    <div id="botList"></div>
+  </div>
+
+  <div id="main">
+    <h2 id="editTitle">Select or create a bot</h2>
+    <input id="botName" placeholder="Nom du bot" />
+    <textarea id="botDescription" placeholder="Description du bot"></textarea>
+    <select id="language">
+      <option value="lua">Lua</option>
+      <option value="python">Python</option>
+      <option value="js">JavaScript</option>
+    </select>
+    <textarea id="botCode" placeholder="Code..."></textarea>
+    <button onclick="saveBot()">Save</button>
+  </div>
+
+  <script>
+    let bots = JSON.parse(localStorage.getItem("bots") || "[]");
+    let currentBotIndex = null;
+
+    function refreshList() {
+      const list = document.getElementById("botList");
+      list.innerHTML = "";
+      bots.forEach((bot, i) => {
+        const div = document.createElement("div");
+        div.className = "bot-item";
+        div.textContent = bot.name;
+        div.onclick = () => editBot(i);
+        list.appendChild(div);
+      });
+    }
+
+    function createBot() {
+      const newBot = { name: "New Bot", description: "", code: "", language: "lua" };
+      bots.push(newBot);
+      currentBotIndex = bots.length - 1;
+      refreshList();
+      editBot(currentBotIndex);
+    }
+
+    function editBot(index) {
+      const bot = bots[index];
+      currentBotIndex = index;
+      document.getElementById("editTitle").textContent = `Editing: ${bot.name}`;
+      document.getElementById("botName").value = bot.name;
+      document.getElementById("botDescription").value = bot.description;
+      document.getElementById("botCode").value = bot.code;
+      document.getElementById("language").value = bot.language;
+    }
+
+    function saveBot() {
+      if (currentBotIndex === null) return;
+      const bot = bots[currentBotIndex];
+      bot.name = document.getElementById("botName").value;
+      bot.description = document.getElementById("botDescription").value;
+      bot.code = document.getElementById("botCode").value;
+      bot.language = document.getElementById("language").value;
+      localStorage.setItem("bots", JSON.stringify(bots));
+      refreshList();
+    }
+
+    refreshList();
+  </script>
+</body>
+</html>
